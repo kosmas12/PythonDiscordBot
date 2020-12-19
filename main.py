@@ -71,7 +71,7 @@ async def hey(ctx):
     print(msg)
     logfile.write(msg)
     logfile.close()
-    await ctx.send(f'Hey, it\'s me, Goku!')
+    await ctx.send(f'Hey, it\'s *me*, ***Goku!***')
 
 
 bot.run(token)
