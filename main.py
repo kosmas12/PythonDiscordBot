@@ -32,4 +32,12 @@ async def on_member_remove(member): # This is called when a member leaves for an
     channel_id = channel.id
     await channel.send(f'{member.name} just left the server. Hope to see you back soon!')
 
+@client.event
+async def on_message(message):
+    if message.author == client.user:
+        return
+    if message.content.startswith('happy birthday'):
+        await message.channel.send('Happy Birthday!')
+
+
 client.run(token)
