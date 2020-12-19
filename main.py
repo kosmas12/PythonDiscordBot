@@ -21,7 +21,7 @@ async def on_ready(): # This is called when a connection to Discord is achieved
 @client.event
 async def on_member_join(member): # This is called when a new member joins
     print(f'New member joined {member.guild}: {member.name}\n')
-    channel = channel = discord.utils.get(member.guild.channels, name="greetings") # Get info for the channel called "greetings" TODO: Be able to change channel
+    channel = discord.utils.get(member.guild.channels, name="greetings") # Get info for the channel called "greetings" TODO: Be able to change channel
     channel_id = channel.id
     await channel.send(f'{member.name} just joined the server! Welcome!') # Send message
 
