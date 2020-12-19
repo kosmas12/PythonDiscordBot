@@ -21,6 +21,7 @@ async def on_ready():
 
 @client.event
 async def on_member_join(member):
+    print(f'New member joined {member.guild}: {member.name}\n')
     await member.create_dm()
     await member.dm_channel.send(f'Hello {member.name}! Welcome to the server!')
 
