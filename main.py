@@ -34,7 +34,7 @@ async def on_ready(): # This is called when a connection to Discord is achieved
 @client.event
 async def on_member_join(member): # This is called when a new member joins
     msg = f'New member joined {member.guild}: {member.name} ' + 'at ' + datetime.now().strftime("%d-%m-%Y-%X") + '\n'
-    logfile = open("logs-" + (today.strftime("%d-%m-%Y")) + ".txt", "a+")
+    logfile = open("logs-" + member.guild.name + (today.strftime("%d-%m-%Y")) + ".txt", "a+")
     print(msg)
     logfile.write(msg)
     logfile.close()
@@ -45,7 +45,7 @@ async def on_member_join(member): # This is called when a new member joins
 @client.event
 async def on_member_remove(member): # This is called when a member leaves for any reason (self leave, ban, etc.)
     msg = f'Member left {member.guild}: {member.name}\n ' + 'at ' + datetime.now().strftime("%d-%m-%Y-%X") + '\n'
-    logfile = open("logs-" + (today.strftime("%d-%m-%Y")) + ".txt", "a+")
+    logfile = open("logs-" + member.guild.name + (today.strftime("%d-%m-%Y")) + ".txt", "a+")
     print(msg)
     logfile.write(msg)
     logfile.close()
