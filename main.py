@@ -92,7 +92,7 @@ async def hey(ctx): # Called when the hey command is used
     print(logmsg)
     logfile.write(logmsg)
     logfile.close()
-    await ctx.send(f'Hey, it\'s *me*, ***Goku!***') # Wait for the message to be sent to the guild the Context is in
+    await ctx.send(f'Hello, {ctx.author.mention}! Nice to see you here!') # Wait for the message to be sent to the guild the Context is in
 
 @bot.command(name='goodnight')
 async def goodnight(ctx): # Called when the goodnight command is used
@@ -114,6 +114,18 @@ async def on_command_error(event, *args, **kwargs): # Called when there's an err
         f.write(logmsg)
         await event.send(f'This command isn\'t implemented yet') # The event can be used like a Context
 
-
+@bot.event
+async def on_guild_join(guild): # Called when the bot joins a server
+    today = date.today()
+    logmsg = f'Joined guild {guild.name}' + 'at ' + datetime.now().strftime("%d-%m-%Y-%X") + '\n'
+    logfile = open("logs-" + (today.strftime("%d-%m-%Y")) + ".txt", "a+")
+    print(logmsg)
+    logfile.write(logmsg)
+    logfile.close()
+    channel = discord.utils.get(guild.channels, name="greetings")
+    channel_id = channel.id
+    await channel.send(f'''Hey, it\'s *me*, ***Goku!***- er, I mean, hello!
+I'm kel! I am a general-purpose Discord bot, here to try and make your server better.
+To see the list of my commands, type kelhelp''')
 
 bot.run(token)
