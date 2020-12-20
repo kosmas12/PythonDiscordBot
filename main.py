@@ -117,7 +117,7 @@ async def on_command_error(event, *args, **kwargs): # Called when there's an err
 @bot.event
 async def on_guild_join(guild): # Called when the bot joins a server
     today = date.today()
-    logmsg = f'Joined guild {guild.name}' + 'at ' + datetime.now().strftime("%d-%m-%Y-%X") + '\n'
+    logmsg = f'Joined guild {guild.name} ' + 'at ' + datetime.now().strftime("%d-%m-%Y-%X") + '\n'
     logfile = open("logs-" + (today.strftime("%d-%m-%Y")) + ".txt", "a+")
     print(logmsg)
     logfile.write(logmsg)
