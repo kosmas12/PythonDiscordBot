@@ -89,8 +89,8 @@ async def goodnight(ctx):
 @bot.event
 async def on_command_error(event, *args, **kwargs):
     today = date.today()
-    with open("logs-" + (today.strftime("%d-%m-%Y")) + ".txt", "a+") as f:
-        msg = f'Unhandled command: {args[0]}\n'
+    with open("logs-" + (event.guild.name) + (today.strftime("%d-%m-%Y")) + ".txt", "a+") as f:
+        msg = f'Unhandled command: {args[0]} ' + 'at ' + datetime.now().strftime("%d-%m-%Y-%X") + '\n'
         print(msg)
         f.write(msg)
         await event.send(f'This command isn\'t implemented yet')
