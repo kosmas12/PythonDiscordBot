@@ -11,10 +11,9 @@ token = os.getenv('DISCORD_TOKEN') # Get the bot's Discord token from our .env f
 intents = discord.Intents.all() # Enable all intents (members list, presence info etc.)
 bot = commands.Bot(command_prefix='kel', intents=intents) # Initialize bot with all intents
 
-today = date.today()
-
 @bot.event
 async def on_ready(): # This is called when a connection to Discord is achieved
+    today = date.today()
     msg = f'{bot.user} has connected to Discord! ' + 'at ' + datetime.now().strftime("%d-%m-%Y-%X") + '\n'
     logfile = open("logs-" + (today.strftime("%d-%m-%Y")) + ".txt", "a+")
     print(msg)
@@ -34,6 +33,7 @@ async def on_ready(): # This is called when a connection to Discord is achieved
 
 @bot.event
 async def on_member_join(member): # This is called when a new member joins
+    today = date.today()
     msg = f'New member joined {member.guild}: {member.name} ' + 'at ' + datetime.now().strftime("%d-%m-%Y-%X") + '\n'
     logfile = open("logs-" + member.guild.name + (today.strftime("%d-%m-%Y")) + ".txt", "a+")
     print(msg)
@@ -45,6 +45,7 @@ async def on_member_join(member): # This is called when a new member joins
 
 @bot.event
 async def on_member_remove(member): # This is called when a member leaves for any reason (self leave, ban, etc.)
+    today = date.today()
     msg = f'Member left {member.guild}: {member.name}\n ' + 'at ' + datetime.now().strftime("%d-%m-%Y-%X") + '\n'
     logfile = open("logs-" + member.guild.name + (today.strftime("%d-%m-%Y")) + ".txt", "a+")
     print(msg)
@@ -65,6 +66,7 @@ async def on_message(message):
 
 @bot.command(name='hey')
 async def hey(ctx):
+    today = date.today()
     guild = ctx.guild
     msg = f'command hey was called ' + 'at ' + datetime.now().strftime("%d-%m-%Y-%X") + '\n'
     logfile = open("logs-" + guild.name + (today.strftime("%d-%m-%Y")) + ".txt", "a+")
@@ -72,6 +74,27 @@ async def hey(ctx):
     logfile.write(msg)
     logfile.close()
     await ctx.send(f'Hey, it\'s *me*, ***Goku!***')
+
+@bot.command(name='goodnight')
+async def goodnight(ctx):
+    today = date.today()
+    guild = ctx.guild
+    msg = f'command goodnight was called ' + 'at ' + datetime.now().strftime("%d-%m-%Y-%X") + '\n'
+    logfile = open("logs-" + guild.name + (today.strftime("%d-%m-%Y")) + ".txt", "a+")
+    print(msg)
+    logfile.write(msg)
+    logfile.close()
+    await ctx.send(f'Goodnight, {ctx.author.mention}')
+
+@bot.event
+async def on_command_error(event, *args, **kwargs):
+    today = date.today()
+    with open("logs-" + (today.strftime("%d-%m-%Y")) + ".txt", "a+") as f:
+        msg = f'Unhandled command: {args[0]}\n'
+        print(msg)
+        f.write(msg)
+        await event.send(f'This command isn\'t implemented yet')
+
 
 
 bot.run(token)
