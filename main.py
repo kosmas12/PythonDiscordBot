@@ -118,6 +118,9 @@ async def goodnight(ctx): # Called when the goodnight command is used
     logfile.close()
     await ctx.send(f'Goodnight, {ctx.author.mention}')
 
+def is_connected(ctx):
+    voice_client = discord.utils.get(ctx.bot.voice_clients, guild=ctx.guild)
+    return voice_client and voice_client.is_connected()
 
 @bot.command(name='tts')
 async def tts(ctx, *, arg):  # Called when the tts command is used
@@ -129,8 +132,9 @@ async def tts(ctx, *, arg):  # Called when the tts command is used
     logfile.write(logmsg)
     logfile.close()
 
-    channel = ctx.author.voice.channel
-    await channel.connect()
+    if not is_connected(ctx):
+        channel = ctx.author.voice.channel
+        await channel.connect()
 
     if not arg:
         # We have nothing to speak
