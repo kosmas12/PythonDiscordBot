@@ -25,7 +25,6 @@ from dotenv import load_dotenv
 from discord.ext import commands
 import pyttsx3
 
-
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN') # Get the bot's Discord token from our .env file
 
@@ -37,9 +36,14 @@ engine = pyttsx3.init()
 
 def speak(text):
     engine.setProperty("rate", 150)
+    fileData = bytearray()
     filePath = './sound.mp3'
-    engine.save_to_file(text, filePath)
+    engine.save_to_file(text, fileData)
     engine.runAndWait()
+    with open(filePath, 'w+b') as f:
+        f.write(fileData)
+        f.close()
+        print("Wrote to file")
     return os.path.abspath(filePath)
 
 @bot.event
@@ -115,6 +119,48 @@ async def goodnight(ctx): # Called when the goodnight command is used
     logfile.write(logmsg)
     logfile.close()
     await ctx.send(f'Goodnight, {ctx.author.mention}')
+
+@bot.command()
+async def tts(ctx, *, arg=None): # Called when the tts command is used
+    today = date.today()
+    guild = ctx.guild # ctx = Context, holds info about the message that called the command, like server, message sender etc.
+    logmsg= f'command tts was called ' + 'at ' + datetime.now().strftime("%d-%m-%Y-%X") + '\n'
+    logfile = open("logs-" + guild.name + (today.strftime("%d-%m-%Y")) + ".txt", "a+")
+    print(logmsg)
+    logfile.write(logmsg)
+    logfile.close()
+
+    channel = ctx.author.voice.channel
+    await channel.connect()
+
+    vc = ctx.voice_client  # We use it more then once, so make it an easy variable
+    if not arg:
+        # We have nothing to speak
+        await ctx.send(f"Hey {ctx.author.mention}, I need to know what to say please.")
+        await vc.disconnect()
+        return
+    if not vc:
+        # We are not currently in a voice channel
+        await ctx.send("I need to be in a voice channel to do this, please use the connect command.")
+        await vc.disconnect()
+        return
+
+    try:
+        vc.play(discord.FFmpegPCMAudio(speak(arg)))
+
+        # set the volume to 1
+        vc.source = discord.PCMVolumeTransformer(vc.source)
+        vc.source.volume = 1
+
+    # Handle the exceptions that can occur
+    except discord.client.ClientException as e:
+        await ctx.send(f"A client exception occured:\n`{e}`")
+    except TypeError as e:
+        await ctx.send(f"TypeError exception:\n`{e}`")
+    except discord.opus.OpusNotLoaded as e:
+        await ctx.send(f"OpusNotLoaded exception: \n`{e}`")
+
+    await vc.disconnect()
 
 @bot.event
 async def on_command_error(event, *args, **kwargs): # Called when there's an error in the last command that was used (like command not found)
