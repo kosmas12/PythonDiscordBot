@@ -43,6 +43,7 @@ def speak(text):
     engine.runAndWait()
     return os.path.abspath(filePath)
 
+
 @bot.event
 async def on_ready(): # This is called when a connection to Discord is achieved
     today = date.today() # Get what day it currently is. Needed because bot is meant to run for multiple days in 1 run.
@@ -117,11 +118,12 @@ async def goodnight(ctx): # Called when the goodnight command is used
     logfile.close()
     await ctx.send(f'Goodnight, {ctx.author.mention}')
 
-@bot.command()
-async def tts(text, name = "tts"): # Called when the tts command is used
+
+@bot.command(name='tts')
+async def tts(ctx, *, arg):  # Called when the tts command is used
     today = date.today()
-    guild = ctx.guild # ctx = Context, holds info about the message that called the command, like server, message sender etc.
-    logmsg= f'command tts was called ' + 'at ' + datetime.now().strftime("%d-%m-%Y-%X") + '\n'
+    guild = ctx.guild  # ctx = Context, holds info about the message that called the command, like server, message sender etc.
+    logmsg = f'command tts was called ' + 'at ' + datetime.now().strftime("%d-%m-%Y-%X") + '\n'
     logfile = open("logs-" + guild.name + (today.strftime("%d-%m-%Y")) + ".txt", "a+")
     print(logmsg)
     logfile.write(logmsg)
@@ -129,31 +131,31 @@ async def tts(text, name = "tts"): # Called when the tts command is used
 
     channel = ctx.author.voice.channel
     await channel.connect()
-    
-    if not text:
+
+    if not arg:
         # We have nothing to speak
         await ctx.send(f"Hey {ctx.author.mention}, I need to know what to say please.")
         return
 
-    vc = ctx.voice_client # We use it more then once, so make it an easy variable
+    vc = ctx.voice_client  # We use it more then once, so make it an easy variable
     if not vc:
         # We are not currently in a voice channel
         await ctx.send("I need to be in a voice channel to do this, please use the connect command.")
         return
 
     try:
-        vc.play(discord.FFmpegPCMAudio(speak(text)))
+        vc.play(discord.FFmpegPCMAudio(speak(arg)))
 
         # set the volume to 1
         vc.source = discord.PCMVolumeTransformer(vc.source)
         vc.source.volume = 1
 
     # Handle the exceptions that can occur
-    except ClientException as e:
+    except discord.ClientException as e:
         await ctx.send(f"A client exception occured:\n`{e}`")
     except TypeError as e:
         await ctx.send(f"TypeError exception:\n`{e}`")
-    except OpusNotLoaded as e:
+    except discord.opus.OpusNotLoaded as e:
         await ctx.send(f"OpusNotLoaded exception: \n`{e}`")
 
 @bot.event
