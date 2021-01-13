@@ -38,6 +38,10 @@ def speak(text):
     engine.setProperty("rate", 150)
     engine.say(text)
     engine.runAndWait()
+    filePath = './sound.mp3'
+    engine.save_to_file(text, filePath)
+    engine.runAndWait()
+    return os.path.abspath(filePath)
 
 @bot.event
 async def on_ready(): # This is called when a connection to Discord is achieved
@@ -68,7 +72,6 @@ async def on_member_join(member): # This is called when a new member joins
     logfile.write(logmsg)
     logfile.close()
     channel = discord.utils.get(member.guild.channels, name="greetings") # Get info for the channel called "greetings" TODO: Be able to change channel
-    channel_id = channel.id
     await channel.send(f'{member.name} just joined the server! Welcome!') # Send message
 
 @bot.event
@@ -160,7 +163,7 @@ async def on_command_error(event, *args, **kwargs): # Called when there's an err
         logmsg= f'Unhandled command: {args[0]} ' + 'at ' + datetime.now().strftime("%d-%m-%Y-%X") + '\n'
         print(logmsg)
         f.write(logmsg)
-        await event.send(f'This command isn\'t implemented yet') # The event can be used like a Context
+        await event.send(f'There was an error processing this command') # The event can be used like a Context
 
 @bot.event
 async def on_guild_join(guild): # Called when the bot joins a server
@@ -175,5 +178,28 @@ async def on_guild_join(guild): # Called when the bot joins a server
     await channel.send(f'''Hey, it\'s *me*, ***Goku!***- er, I mean, hello!
 I'm kel! I am a general-purpose Discord bot, here to try and make your server better.
 To see the list of my commands, type kelhelp''')
+
+
+@bot.command(name='bam')
+async def bam(ctx, user: discord.User, *, reason='God knows what'):
+    today = date.today()
+    guild = ctx.guild
+    logmsg = f'command bam was called ' + 'at ' + datetime.now().strftime("%d-%m-%Y-%X") + '\n'
+    logfile = open("logs-" + guild.name + (today.strftime("%d-%m-%Y")) + ".txt", "a+")
+    logfile.write(logmsg)
+    logfile.close()
+    print(logmsg)
+    await ctx.channel.send(f'{user.mention} just got bammed for {reason}!')
+
+@bot.command(name='fr')
+async def fr(ctx, *, arg):
+    today = date.today()
+    guild = ctx.guild
+    logmsg= f'New feature request in ' + guild.name + ' at ' + datetime.now().strftime("%d-%m-%Y-%X") + ': \n' + arg + '\n'
+    logfile = open("features-" + guild.name + (today.strftime("%d-%m-%Y")) + ".txt", "a+")
+    logfile.write(logmsg)
+    logfile.close()
+    print(logmsg)
+    await ctx.channel.send(f'{ctx.author.mention}, your request has been logged succesfully.')
 
 bot.run(token)
