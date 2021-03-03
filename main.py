@@ -24,6 +24,8 @@ from datetime import date, time, datetime
 from dotenv import load_dotenv
 from discord.ext import commands
 import pyttsx3
+import requests
+from youtube_dl import YoutubeDL as YouTubeDL
 
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN') # Get the bot's Discord token from our .env file
@@ -34,14 +36,117 @@ bot = commands.Bot(command_prefix='kel', intents=intents) # Initialize bot with 
 #configure text-to-speech
 engine = pyttsx3.init()
 
-def speak(text):
-    engine.setProperty("rate", 150)
-    engine.say(text)
-    engine.runAndWait()
-    filePath = './sound.mp3'
-    engine.save_to_file(text, filePath)
-    engine.runAndWait()
-    return os.path.abspath(filePath)
+class Misc(commands.Cog):
+
+    def speak(self, text):
+        engine.setProperty("rate", 150)
+        engine.say(text)
+        engine.runAndWait()
+        filePath = './sound.mp3'
+        engine.save_to_file(text, filePath)
+        engine.runAndWait()
+        return os.path.abspath(filePath)
+
+    @commands.command(name='hey')
+    async def hey(self, ctx):  # Called when the hey command is used
+        today = date.today()
+        self.guild = ctx.guild  # ctx = Context, holds info about the message that called the command, like server, message sender etc.
+        logmsg = f'command hey was called ' + 'at ' + datetime.now().strftime("%d-%m-%Y-%X") + '\n'
+        logfile = open("logs-" + guild.name + (today.strftime("%d-%m-%Y")) + ".txt", "a+")
+        print(logmsg)
+        logfile.write(logmsg)
+        logfile.close()
+        await ctx.send(
+            f'Hello, {ctx.author.mention}! Nice to see you here!')  # Wait for the message to be sent to the guild the Context is in
+
+    @commands.command(name='goodnight')
+    async def goodnight(self, ctx):  # Called when the goodnight command is used
+        today = date.today()
+        self.guild = ctx.guild
+        logmsg = f'command goodnight was called ' + 'at ' + datetime.now().strftime("%d-%m-%Y-%X") + '\n'
+        logfile = open("logs-" + guild.name + (today.strftime("%d-%m-%Y")) + ".txt", "a+")
+        print(logmsg)
+        logfile.write(logmsg)
+        logfile.close()
+        await ctx.send(f'Goodnight, {ctx.author.mention}')
+
+    def is_connected(self, ctx):
+        voice_client = discord.utils.get(ctx.bot.voice_clients, guild=ctx.guild)
+        return voice_client and voice_client.is_connected()
+
+    @commands.command(name='tts')
+    async def tts(self, ctx, *, arg):  # Called when the tts command is used
+        today = date.today()
+        self.guild = ctx.guild  # ctx = Context, holds info about the message that called the command, like server, message sender etc.
+        logmsg = f'command tts was called ' + 'at ' + datetime.now().strftime("%d-%m-%Y-%X") + '\n'
+        logfile = open("logs-" + ctx.guild.name + (today.strftime("%d-%m-%Y")) + ".txt", "a+")
+        print(logmsg)
+        logfile.write(logmsg)
+        logfile.close()
+
+        if not self.is_connected(ctx):
+            channel = ctx.author.voice.channel
+            await channel.connect()
+
+        if not arg:
+            # We have nothing to speak
+            await ctx.send(f"Hey {ctx.author.mention}, I need to know what to say please.")
+            return
+
+        vc = ctx.voice_client  # We use it more then once, so make it an easy variable
+        if not vc:
+            # We are not currently in a voice channel
+            await ctx.send("I need to be in a voice channel to do this, please use the connect command.")
+            return
+
+        try:
+            vc.play(discord.FFmpegPCMAudio(self.speak(arg)))
+
+            # set the volume to 1
+            vc.source = discord.PCMVolumeTransformer(vc.source)
+            vc.source.volume = 1
+
+        # Handle the exceptions that can occur
+        except discord.ClientException as e:
+            await ctx.send(f"A client exception occured:\n`{e}`")
+        except TypeError as e:
+            await ctx.send(f"TypeError exception:\n`{e}`")
+        except discord.opus.OpusNotLoaded as e:
+            await ctx.send(f"OpusNotLoaded exception: \n`{e}`")
+
+    @commands.command(name='bam')
+    async def bam(self, ctx, user: discord.User, *, reason='God knows what'):
+        today = date.today()
+        self.guild = ctx.guild
+        logmsg = f'command bam was called ' + 'at ' + datetime.now().strftime("%d-%m-%Y-%X") + '\n'
+        logfile = open("logs-" + self.guild.name + (today.strftime("%d-%m-%Y")) + ".txt", "a+")
+        logfile.write(logmsg)
+        logfile.close()
+        print(logmsg)
+        await ctx.channel.send(f'{user.mention} just got bammed for {reason}!')
+
+    @commands.command(name='bonk')
+    async def bonk(self, ctx, user: discord.User, *, reason='no horni'):
+        today = date.today()
+        self.guild = ctx.guild
+        logmsg = f'command bonk was called ' + 'at ' + datetime.now().strftime("%d-%m-%Y-%X") + '\n'
+        logfile = open("logs-" + self.guild.name + (today.strftime("%d-%m-%Y")) + ".txt", "a+")
+        logfile.write(logmsg)
+        logfile.close()
+        print(logmsg)
+        await ctx.channel.send(f'{user.mention} just got bonked by {ctx.author.mention} for {reason}!')
+
+    @commands.command(name='fr')
+    async def fr(self, ctx, *, arg):
+        today = date.today()
+        self.guild = ctx.guild
+        logmsg = f'New feature request in ' + self.guild.name + ' at ' + datetime.now().strftime(
+            "%d-%m-%Y-%X") + ': \n' + arg + '\n'
+        logfile = open("features-" + self.guild.name + (today.strftime("%d-%m-%Y")) + ".txt", "a+")
+        logfile.write(logmsg)
+        logfile.close()
+        print(logmsg)
+        await ctx.channel.send(f'{ctx.author.mention}, your request has been logged succesfully.')
 
 
 @bot.event
@@ -96,72 +201,6 @@ async def on_message(message): # This is called when a message is sent
         await message.channel.send('Happy Birthday!')
     await bot.process_commands(message) # Wait for the bot to process all commands before exiting, required to handle commands with this event
 
-@bot.command(name='hey')
-async def hey(ctx): # Called when the hey command is used
-    today = date.today()
-    guild = ctx.guild # ctx = Context, holds info about the message that called the command, like server, message sender etc.
-    logmsg= f'command hey was called ' + 'at ' + datetime.now().strftime("%d-%m-%Y-%X") + '\n'
-    logfile = open("logs-" + guild.name + (today.strftime("%d-%m-%Y")) + ".txt", "a+")
-    print(logmsg)
-    logfile.write(logmsg)
-    logfile.close()
-    await ctx.send(f'Hello, {ctx.author.mention}! Nice to see you here!') # Wait for the message to be sent to the guild the Context is in
-
-@bot.command(name='goodnight')
-async def goodnight(ctx): # Called when the goodnight command is used
-    today = date.today()
-    guild = ctx.guild
-    logmsg= f'command goodnight was called ' + 'at ' + datetime.now().strftime("%d-%m-%Y-%X") + '\n'
-    logfile = open("logs-" + guild.name + (today.strftime("%d-%m-%Y")) + ".txt", "a+")
-    print(logmsg)
-    logfile.write(logmsg)
-    logfile.close()
-    await ctx.send(f'Goodnight, {ctx.author.mention}')
-
-def is_connected(ctx):
-    voice_client = discord.utils.get(ctx.bot.voice_clients, guild=ctx.guild)
-    return voice_client and voice_client.is_connected()
-
-@bot.command(name='tts')
-async def tts(ctx, *, arg):  # Called when the tts command is used
-    today = date.today()
-    guild = ctx.guild  # ctx = Context, holds info about the message that called the command, like server, message sender etc.
-    logmsg = f'command tts was called ' + 'at ' + datetime.now().strftime("%d-%m-%Y-%X") + '\n'
-    logfile = open("logs-" + guild.name + (today.strftime("%d-%m-%Y")) + ".txt", "a+")
-    print(logmsg)
-    logfile.write(logmsg)
-    logfile.close()
-
-    if not is_connected(ctx):
-        channel = ctx.author.voice.channel
-        await channel.connect()
-
-    if not arg:
-        # We have nothing to speak
-        await ctx.send(f"Hey {ctx.author.mention}, I need to know what to say please.")
-        return
-
-    vc = ctx.voice_client  # We use it more then once, so make it an easy variable
-    if not vc:
-        # We are not currently in a voice channel
-        await ctx.send("I need to be in a voice channel to do this, please use the connect command.")
-        return
-
-    try:
-        vc.play(discord.FFmpegPCMAudio(speak(arg)))
-
-        # set the volume to 1
-        vc.source = discord.PCMVolumeTransformer(vc.source)
-        vc.source.volume = 1
-
-    # Handle the exceptions that can occur
-    except discord.ClientException as e:
-        await ctx.send(f"A client exception occured:\n`{e}`")
-    except TypeError as e:
-        await ctx.send(f"TypeError exception:\n`{e}`")
-    except discord.opus.OpusNotLoaded as e:
-        await ctx.send(f"OpusNotLoaded exception: \n`{e}`")
-
 @bot.event
 async def on_command_error(event, *args, **kwargs): # Called when there's an error in the last command that was used (like command not found)
     today = date.today()
@@ -185,27 +224,36 @@ async def on_guild_join(guild): # Called when the bot joins a server
 I'm kel! I am a general-purpose Discord bot, here to try and make your server better.
 To see the list of my commands, type kelhelp''')
 
+class YouTube(commands.Cog):
+    def search(self, arg):
+        with YouTubeDL({'format': 'bestaudio', 'noplaylist': 'True'}) as ydl:
+            try:
+                requests.get(arg)
+            except:
+                info = ydl.extract_info(f"ytsearch:{arg}", download=False)['entries'][0]
+            else:
+                info = ydl.extract_info(arg, download=False)
+        return (info, info['formats'][0]['url'])
 
-@bot.command(name='bam')
-async def bam(ctx, user: discord.User, *, reason='God knows what'):
-    today = date.today()
-    guild = ctx.guild
-    logmsg = f'command bam was called ' + 'at ' + datetime.now().strftime("%d-%m-%Y-%X") + '\n'
-    logfile = open("logs-" + guild.name + (today.strftime("%d-%m-%Y")) + ".txt", "a+")
-    logfile.write(logmsg)
-    logfile.close()
-    print(logmsg)
-    await ctx.channel.send(f'{user.mention} just got bammed for {reason}!')
+    @commands.command(name='yt')
+    async def yt(self, ctx, query):
+        FFMPEG_OPTS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
+        video, source = self.search(query)
+        voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
 
-@bot.command(name='fr')
-async def fr(ctx, *, arg):
-    today = date.today()
-    guild = ctx.guild
-    logmsg= f'New feature request in ' + guild.name + ' at ' + datetime.now().strftime("%d-%m-%Y-%X") + ': \n' + arg + '\n'
-    logfile = open("features-" + guild.name + (today.strftime("%d-%m-%Y")) + ".txt", "a+")
-    logfile.write(logmsg)
-    logfile.close()
-    print(logmsg)
-    await ctx.channel.send(f'{ctx.author.mention}, your request has been logged succesfully.')
+        channel = ctx.author.voice.channel
 
+        if voice and voice.is_connected():
+            await voice.move_to(channel)
+        else:
+            voice = await channel.connect()
+
+        await ctx.send(f'Now playing {source["title"]}.')
+
+        voice.play(discord.FFmpegPCMAudio(source, **FFMPEG_OPTS), after=lambda e: print('done', e))
+        voice.is_playing()
+
+
+bot.add_cog(Misc(bot))
+bot.add_cog(YouTube(bot))
 bot.run(token)
